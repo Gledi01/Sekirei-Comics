@@ -5,6 +5,9 @@ let currentPdf = null, currentPage = 1, currentVolId = "", renderTask = null;
 let carouselIndex = 0, carouselPdfInstance = null;
 const TOTAL_BANNER_PAGES = 110;
 
+// ===== LOCK ADDITION =====
+const SERVER_OPEN = false;
+
 // --- 1. DATA CONFIGURATION (MANUAL URL) ---
 const archiveLibrary = {
     'vol1': 'https://archive.org/download/vol13_20260119/vol1.pdf',
@@ -27,7 +30,7 @@ const archiveLibrary = {
     'vol8': 'https://archive.org/download/vol13_20260119/vol8.pdf',
     'vol9': 'https://archive.org/download/vol13_20260119/vol9.pdf',
     'vol10': 'https://archive.org/download/vol13_20260119/vol10.pdf',
-    'vol11': 'LOCKED',
+    'vol11': 'https://archive.org/download/vol13_20260119/vol11.pdf',
     'vol12': 'https://archive.org/download/vol13_20260119/vol12.pdf',
     'vol13': 'https://archive.org/download/vol13_20260119/vol13.pdf',
     'vol14': 'https://archive.org/download/vol13_20260119/vol14.pdf',
@@ -64,7 +67,7 @@ async function initApp() {
     }, 4000);
 }
 
-// --- 3. DASHBOARD RENDERER (Tampilan Row) ---
+// --- 3. DASHBOARD RENDERER ---
 function renderDashboard() {
     const list = document.getElementById('volume-list');
     if (!list) return;
@@ -74,20 +77,18 @@ function renderDashboard() {
         const prog = localStorage.getItem(`prog_${v.id}`) || 0;
         return `
             <div class="vol-card" onclick="openReader('${v.id}', '${v.title}')">
-                <img src="thumbnail/${v.thumb}" class="vol-thumbnail" onerror="this.src='https://via.placeholder.com/200x280?text=Error'">
+                <img src="thumbnail/${v.thumb}" class="vol-thumbnail">
                 <div class="vol-info">
                     <strong>${v.title}</strong>
                     <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
-                    <small style="color:var(--text-dim)">${prog}% Complete</small>
+                    <small>${prog}% Complete</small>
                 </div>
             </div>`;
     };
 
-    const createRow = (title, items) => {
-        if (!items.length) return '';
-        return `<h3 class="row-title">${title}</h3>
-                <div class="volume-row-list">${items.map(v => createCard(v)).join('')}</div>`;
-    };
+    const createRow = (title, items) =>
+        `<h3 class="row-title">${title}</h3>
+         <div class="volume-row-list">${items.map(v => createCard(v)).join('')}</div>`;
 
     list.innerHTML += createRow("Main Story: Vol 01 - 05", mainVolumes.slice(0, 4));
     list.innerHTML += createRow("Exclusive: Volume 03 Chapters", vol3Chapters);
@@ -99,10 +100,21 @@ function renderDashboard() {
     calculateGlobal();
 }
 
+// ===== LOCK ADDITION =====
+function showLockPopup() {
+    document.getElementById('lock-popup').classList.remove('hidden');
+}
+function closeLockPopup() {
+    document.getElementById('lock-popup').classList.add('hidden');
+}
+
 // --- 4. READER LOGIC ---
 async function openReader(id, title) {
-    if (id === 'vol11') {
-        alert("Akses terbatas, batas waktu 01:01-7:2026");
+
+    // ===== LOCK ADDITION =====
+    const isSpecial = id === 'extra' || id === 'carousel';
+    if (!SERVER_OPEN && !isSpecial) {
+        showLockPopup();
         return;
     }
 
@@ -117,7 +129,6 @@ async function openReader(id, title) {
     } else if (id === 'carousel') {
         finalUrl = '/comics/carousel.pdf';
     } else {
-        // Ambil URL Manual dari archiveLibrary
         const rawUrl = archiveLibrary[id];
         finalUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
     }
@@ -127,9 +138,9 @@ async function openReader(id, title) {
         currentPdf = await loadingTask.promise;
         currentPage = parseInt(localStorage.getItem(`last_page_${id}`)) || 1;
         renderPage(currentPage);
-    } catch (e) { 
-        alert("Gagal memuat PDF. Pastikan WiFi stabil atau coba refresh."); 
-        closeReader(); 
+    } catch (e) {
+        showLockPopup();
+        closeReader();
     }
 }
 
@@ -140,49 +151,42 @@ async function renderPage(num) {
     const container = document.getElementById('pdf-render-area');
     container.innerHTML = '';
     const canvas = document.createElement('canvas');
-    canvas.height = viewport.height; canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
     container.appendChild(canvas);
     renderTask = page.render({ canvasContext: canvas.getContext('2d'), viewport });
-    
     document.getElementById('page-info').innerText = `${num} / ${currentPdf.numPages}`;
-    document.getElementById('page-slider').max = currentPdf.numPages;
-    document.getElementById('page-slider').value = num;
 }
 
 // --- 5. CAROUSEL ---
 async function initCarousel() {
     const track = document.getElementById('carousel-track');
-    try {
-        carouselPdfInstance = await pdfjsLib.getDocument('/comics/slider.pdf').promise;
-        for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
-            const slide = document.createElement('div');
-            slide.className = 'carousel-slide';
-            slide.id = `banner-slide-${i}`;
-            track.appendChild(slide);
-        }
-        renderCarouselPage(1);
-    } catch (e) { 
-        console.warn("Slider gagal dari /comics/slider.pdf"); 
+    carouselPdfInstance = await pdfjsLib.getDocument('/comics/slider.pdf').promise;
+    for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
+        const slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        slide.id = `banner-slide-${i}`;
+        track.appendChild(slide);
     }
+    renderCarouselPage(1);
 }
 
 async function renderCarouselPage(num) {
     const slide = document.getElementById(`banner-slide-${num}`);
-    if (!slide || slide.querySelector('canvas') || !carouselPdfInstance) return;
+    if (!slide || slide.querySelector('canvas')) return;
     const page = await carouselPdfInstance.getPage(num);
     const viewport = page.getViewport({ scale: 1 });
     const canvas = document.createElement('canvas');
-    canvas.height = viewport.height; canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
     slide.appendChild(canvas);
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    page.render({ canvasContext: canvas.getContext('2d'), viewport });
 }
 
 function updateCarouselUI() {
     const track = document.getElementById('carousel-track');
-    if(track) {
-        track.style.transform = `translateX(-${carouselIndex * 100}%)`;
-        renderCarouselPage(carouselIndex + 1);
-    }
+    track.style.transform = `translateX(-${carouselIndex * 100}%)`;
+    renderCarouselPage(carouselIndex + 1);
 }
 
 // --- UTILS ---
@@ -190,8 +194,8 @@ function calculateGlobal() {
     const all = [...mainVolumes, ...vol3Chapters, ...specialVolumes];
     let t = 0;
     all.forEach(v => t += parseInt(localStorage.getItem(`prog_${v.id}`)) || 0);
-    const el = document.getElementById('total-stat');
-    if(el) el.innerText = `Total Progress: ${Math.round(t / all.length)}%`;
+    document.getElementById('total-stat').innerText =
+        `Total Progress: ${Math.round(t / all.length)}%`;
 }
 
 function closeReader() {
@@ -205,4 +209,3 @@ function prevPage() { if (currentPage > 1) renderPage(--currentPage); }
 function goToPage(num) { currentPage = parseInt(num); renderPage(currentPage); }
 
 initApp();
-        
