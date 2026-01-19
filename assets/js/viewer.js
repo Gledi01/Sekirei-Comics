@@ -115,7 +115,7 @@ async function renderPage(num) {
 async function initCarousel() {
     const track = document.getElementById('carousel-track');
     try {
-        carouselPdfInstance = await pdfjsLib.getDocument(`comics/slider.pdf`).promise;
+        carouselPdfInstance = await pdfjsLib.getDocument(`/comics/slider.pdf`).promise;
         for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
             const slide = document.createElement('div');
             slide.className = 'carousel-slide';
