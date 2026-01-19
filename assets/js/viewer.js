@@ -115,7 +115,7 @@ async function renderPage(num) {
 async function initCarousel() {
     const track = document.getElementById('carousel-track');
     try {
-        carouselPdfInstance = await pdfjsLib.getDocument('php/get_pdf.php?vol=slider').promise;
+        carouselPdfInstance = await pdfjsLib.getDocument(`comics/slider.pdf`).promise;
         for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
             const slide = document.createElement('div');
             slide.className = 'carousel-slide';
@@ -170,4 +170,3 @@ function goToPage(num) { currentPage = parseInt(num); renderPage(currentPage); }
 function startReadingLatest() { openReader(mainVolumes[0].id, mainVolumes[0].title); }
 
 initApp();
-                                
