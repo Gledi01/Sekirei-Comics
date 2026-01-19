@@ -1,0 +1,130 @@
+:root {
+    --bg: #0d0d0f;
+    --card: #1a1a1e;
+    --accent: #ff2e63;
+    --accent-glow: rgba(255, 46, 99, 0.4);
+    --text: #ffffff;
+    --text-dim: #a0a0a5;
+}
+
+body {
+    margin: 0; font-family: 'Oswald', sans-serif;
+    background: var(--bg); color: var(--text);
+    overflow-x: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* --- CAROUSEL & BANNER --- */
+.carousel-container {
+    position: relative; width: 100%; height: 550px; 
+    background: #000; overflow: hidden; 
+}
+
+.carousel-track {
+    display: flex; width: 100%; height: 100%; 
+    transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Hanya untuk Canvas di Banner */
+.carousel-slide { min-width: 100%; height: 100%; position: relative; }
+.carousel-slide canvas {
+    width: 100% !important; height: 100% !important;
+    object-fit: cover; display: block;
+    filter: brightness(0.3) contrast(1.1);
+}
+
+.carousel-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to top, var(--bg) 20%, transparent 80%);
+    display: flex; align-items: flex-end; 
+    padding: 0 60px 15px 60px; box-sizing: border-box; z-index: 10;
+    pointer-events: none;
+}
+
+.carousel-content { pointer-events: auto; width: 100%; max-width: 800px; }
+
+.anime-title {
+    font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; font-style: italic;
+    line-height: 0.85; margin: 0; letter-spacing: -3px;
+    background: linear-gradient(to right, #fff, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px var(--accent-glow));
+}
+
+.anime-metadata { display: flex; align-items: center; gap: 15px; margin: 10px 0 15px 0; }
+.rating-box {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(243, 206, 19, 0.15); padding: 4px 12px;
+    border-radius: 6px; border: 1px solid rgba(243, 206, 19, 0.3);
+}
+.rating-box .star { color: #f3ce13; filter: drop-shadow(0 0 5px rgba(243, 206, 19, 0.6)); }
+.meta-divider { width: 2px; height: 15px; background: rgba(255, 255, 255, 0.2); }
+.tag {
+    background: rgba(255, 255, 255, 0.08); padding: 3px 10px;
+    border-radius: 4px; font-size: 0.7rem; color: #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.anime-subtitle {
+    font-size: 0.9rem; color: var(--text-dim); letter-spacing: 3px;
+    margin-bottom: 25px; text-transform: uppercase;
+}
+
+/* --- VOLUME GRID (FULL WIDTH) --- */
+.dashboard-header { padding: 30px 60px; }
+.volume-grid { display: flex; flex-direction: column; gap: 40px; padding: 20px 0; }
+.row-title {
+    font-size: 1.2rem; color: var(--accent); text-transform: uppercase;
+    border-left: 4px solid var(--accent); padding-left: 15px; margin-left: 60px; 
+}
+.volume-row-list {
+    display: flex; overflow-x: auto; gap: 20px; padding: 0 60px 20px 60px; scrollbar-width: none; 
+}
+.volume-row-list::-webkit-scrollbar { display: none; }
+
+.vol-card {
+    min-width: 200px; flex: 0 0 auto;
+    background: var(--card); border-radius: 8px; overflow: hidden;
+    border: 1px solid #222; transition: 0.4s;
+}
+.vol-card:hover { transform: translateY(-8px) rotate(1deg); border-color: var(--accent); }
+.vol-thumbnail { width: 100%; height: 280px; object-fit: cover; }
+.vol-info { padding: 15px; }
+
+/* --- BUTTONS --- */
+.carousel-actions { display: flex; gap: 15px; }
+.btn-main {
+    background: var(--accent); color: #fff; padding: 15px 40px;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+    cursor: pointer; font-weight: bold; border: none; transition: 0.3s;
+}
+
+/* --- READER VIEW (VERSI ASLI/SEMULA) --- */
+#reader {
+    position: fixed; inset: 0; background: #050505; z-index: 2000;
+    display: flex; flex-direction: column;
+}
+#viewer-container { 
+    flex: 1; overflow-y: auto; display: flex; 
+    justify-content: center; padding: 20px; background: #000; 
+}
+/* Reset Canvas khusus Reader agar tidak gepeng & tidak gelap */
+#pdf-render-area canvas {
+    max-width: 100%;
+    height: auto !important;
+    filter: none !important; /* Terang kembali */
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+}
+
+.reader-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 25px; background: #111; border-top: 1px solid #222;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    .carousel-overlay { padding: 0 20px 15px 20px; }
+    .dashboard-header { padding: 20px; }
+    .row-title { margin-left: 20px; }
+    .volume-row-list { padding: 0 20px 20px 20px; }
+}

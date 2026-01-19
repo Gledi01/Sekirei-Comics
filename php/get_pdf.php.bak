@@ -1,0 +1,14 @@
+<?php
+// Mengambil nama file dari parameter URL
+$file = isset($_GET['vol']) ? $_GET['vol'] : '';
+$path = "../comics/" . $file . ".pdf";
+
+if (file_exists($path)) {
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="' . $file . '.pdf"');
+    header('Accept-Ranges: bytes');
+    readfile($path);
+} else {
+    header("HTTP/1.1 404 Not Found");
+}
+?>

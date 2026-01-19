@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sekirei Interactive Reader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <div id="app">
+        <section id="dashboard">
+            <div class="carousel-container">
+                <div id="carousel-track" class="carousel-track"></div>
+                <div class="carousel-overlay">
+                    <div class="carousel-content">
+                        <h1 class="anime-title">SEKIREI</h1>
+                        <p class="anime-subtitle">The Game of Ashikabi Begins</p>
+                        <div class="carousel-actions">
+                            <button class="btn-main" onclick="startReadingLatest()">BACA SEKARANG</button>
+                            <button class="btn-sub" onclick="document.getElementById('volume-list').scrollIntoView({behavior:'smooth'})">Koleksi</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-dots" id="carousel-dots"></div>
+            </div>
+
+            <header class="dashboard-header">
+                <div class="stat-box">
+                    <span id="total-stat">Total Progress: 0%</span>
+                </div>
+                <button class="btn-reset" onclick="resetAllProgress()">Reset Library</button>
+            </header>
+
+            <div id="volume-list"></div>
+            <section id="video-series">
+    <h3 class="row-title">Official Clip & Trailer</h3>
+    <div class="video-wrapper">
+        <div class="video-card">
+            <iframe 
+                src="https://www.youtube.com/embed/4KqFiyZXqcc" 
+                title="Sekirei Video Clip"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+</section>
+
+        </section>
+
+        <section id="reader" class="hidden">
+            <div class="reader-nav">
+                <button class="nav-btn close" onclick="closeReader()">✕ Kembali</button>
+                <div class="nav-info">
+                    <h4 id="reader-title">Memuat...</h4>
+                    <span id="page-info">0 / 0</span>
+                </div>
+            </div>
+            
+            <div id="viewer-container">
+                <div id="pdf-render-area"></div>
+            </div>
+
+            <div class="reader-footer">
+                <button onclick="prevPage()">PREV</button>
+                <input type="range" id="page-slider" min="1" value="1" step="1" oninput="goToPage(this.value)">
+                <button onclick="nextPage()">NEXT</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="assets/js/viewer.js"></script>
+</body>
+</html>
