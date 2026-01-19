@@ -5,8 +5,37 @@ let currentPdf = null, currentPage = 1, currentVolId = "", renderTask = null;
 let carouselIndex = 0, carouselPdfInstance = null;
 const TOTAL_BANNER_PAGES = 110;
 
-// --- 1. DATA CONFIGURATION ---
-const archiveBase = "https://archive.org/download/vol13_20260119/";
+// --- 1. DATA CONFIGURATION (MANUAL URL) ---
+const archiveLibrary = {
+    'vol1': 'https://archive.org/download/vol13_20260119/vol1.pdf',
+    'vol2': 'https://archive.org/download/vol13_20260119/vol2.pdf',
+    'vol3-1': 'https://archive.org/download/vol13_20260119/vol3-1.pdf',
+    'vol3-2': 'https://archive.org/download/vol13_20260119/vol3-2.pdf',
+    'vol3-3': 'https://archive.org/download/vol13_20260119/vol3-3.pdf',
+    'vol3-4': 'https://archive.org/download/vol13_20260119/vol3-4.pdf',
+    'vol3-5': 'https://archive.org/download/vol13_20260119/vol3-5.pdf',
+    'vol3-6': 'https://archive.org/download/vol13_20260119/vol3-6.pdf',
+    'vol3-7': 'https://archive.org/download/vol13_20260119/vol3-7.pdf',
+    'vol3-8': 'https://archive.org/download/vol13_20260119/vol3-8.pdf',
+    'vol3-9': 'https://archive.org/download/vol13_20260119/vol3-9.pdf',
+    'vol3-10': 'https://archive.org/download/vol13_20260119/vol3-10.pdf',
+    'vol3-11': 'https://archive.org/download/vol13_20260119/vol3-11.pdf',
+    'vol4': 'https://archive.org/download/vol13_20260119/vol4.pdf',
+    'vol5': 'https://archive.org/download/vol13_20260119/vol5.pdf',
+    'vol6': 'https://archive.org/download/vol13_20260119/vol6.pdf',
+    'vol7': 'https://archive.org/download/vol13_20260119/vol7.pdf',
+    'vol8': 'https://archive.org/download/vol13_20260119/vol8.pdf',
+    'vol9': 'https://archive.org/download/vol13_20260119/vol9.pdf',
+    'vol10': 'https://archive.org/download/vol13_20260119/vol10.pdf',
+    'vol11': 'LOCKED',
+    'vol12': 'https://archive.org/download/vol13_20260119/vol12.pdf',
+    'vol13': 'https://archive.org/download/vol13_20260119/vol13.pdf',
+    'vol14': 'https://archive.org/download/vol13_20260119/vol14.pdf',
+    'vol15': 'https://archive.org/download/vol13_20260119/vol15.pdf',
+    'vol16': 'https://archive.org/download/vol13_20260119/vol16.pdf',
+    'vol17': 'https://archive.org/download/vol13_20260119/vol17.pdf',
+    'vol18': 'https://archive.org/download/vol13_20260119/vol18.pdf'
+};
 
 const specialVolumes = [
     { id: 'extra', title: 'Sekirei: Extra Celebrate', thumb: 'extra.jpg' },
@@ -35,7 +64,7 @@ async function initApp() {
     }, 4000);
 }
 
-// --- 3. DASHBOARD RENDERER (Sesuai Tampilan Asli Kamu) ---
+// --- 3. DASHBOARD RENDERER (Tampilan Row) ---
 function renderDashboard() {
     const list = document.getElementById('volume-list');
     if (!list) return;
@@ -45,7 +74,7 @@ function renderDashboard() {
         const prog = localStorage.getItem(`prog_${v.id}`) || 0;
         return `
             <div class="vol-card" onclick="openReader('${v.id}', '${v.title}')">
-                <img src="thumbnail/${v.thumb}" class="vol-thumbnail" onerror="this.src='https://via.placeholder.com/200x280?text=Error+Load'">
+                <img src="thumbnail/${v.thumb}" class="vol-thumbnail" onerror="this.src='https://via.placeholder.com/200x280?text=Error'">
                 <div class="vol-info">
                     <strong>${v.title}</strong>
                     <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
@@ -88,9 +117,8 @@ async function openReader(id, title) {
     } else if (id === 'carousel') {
         finalUrl = '/comics/carousel.pdf';
     } else {
-        // Menggunakan link download langsung Archive.org
-        const rawUrl = archiveBase + id + ".pdf";
-        // Menggunakan proxy AllOrigins untuk menembus CORS Archive.org
+        // Ambil URL Manual dari archiveLibrary
+        const rawUrl = archiveLibrary[id];
         finalUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
     }
 
@@ -100,8 +128,7 @@ async function openReader(id, title) {
         currentPage = parseInt(localStorage.getItem(`last_page_${id}`)) || 1;
         renderPage(currentPage);
     } catch (e) { 
-        console.error(e);
-        alert("Gagal memuat PDF. Pastikan koneksi stabil."); 
+        alert("Gagal memuat PDF. Pastikan WiFi stabil atau coba refresh."); 
         closeReader(); 
     }
 }
@@ -126,7 +153,6 @@ async function renderPage(num) {
 async function initCarousel() {
     const track = document.getElementById('carousel-track');
     try {
-        // Slider tetap lokal jalur absolut
         carouselPdfInstance = await pdfjsLib.getDocument('/comics/slider.pdf').promise;
         for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
             const slide = document.createElement('div');
@@ -135,7 +161,9 @@ async function initCarousel() {
             track.appendChild(slide);
         }
         renderCarouselPage(1);
-    } catch (e) { console.warn("Slider gagal dimuat dari /comics/slider.pdf"); }
+    } catch (e) { 
+        console.warn("Slider gagal dari /comics/slider.pdf"); 
+    }
 }
 
 async function renderCarouselPage(num) {
@@ -169,6 +197,7 @@ function calculateGlobal() {
 function closeReader() {
     document.getElementById('dashboard').classList.remove('hidden');
     document.getElementById('reader').classList.add('hidden');
+    renderDashboard();
 }
 
 function nextPage() { if (currentPage < currentPdf.numPages) renderPage(++currentPage); }
@@ -176,4 +205,4 @@ function prevPage() { if (currentPage > 1) renderPage(--currentPage); }
 function goToPage(num) { currentPage = parseInt(num); renderPage(currentPage); }
 
 initApp();
-            
+        
