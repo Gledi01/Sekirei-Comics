@@ -5,7 +5,7 @@ let currentPdf = null, currentPage = 1, currentVolId = "", renderTask = null;
 let carouselIndex = 0, carouselPdfInstance = null;
 const TOTAL_BANNER_PAGES = 110;
 
-// --- 1. DATA ---
+// --- 1. DATA CONFIGURATION ---
 const archiveBase = "https://archive.org/download/vol13_20260119/";
 
 const specialVolumes = [
@@ -35,7 +35,7 @@ async function initApp() {
     }, 4000);
 }
 
-// --- 3. RENDER DASHBOARD ---
+// --- 3. DASHBOARD RENDERER (TAMPILAN ASLI KAMU) ---
 function renderDashboard() {
     const list = document.getElementById('volume-list');
     if (!list) return;
@@ -45,21 +45,34 @@ function renderDashboard() {
         const prog = localStorage.getItem(`prog_${v.id}`) || 0;
         return `
             <div class="vol-card" onclick="openReader('${v.id}', '${v.title}')">
-                <img src="thumbnail/${v.thumb}" class="vol-thumbnail">
+                <img src="thumbnail/${v.thumb}" class="vol-thumbnail" onerror="this.src='https://via.placeholder.com/200x280?text=Error+Load'">
                 <div class="vol-info">
                     <strong>${v.title}</strong>
                     <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
+                    <small style="color:var(--text-dim)">${prog}% Complete</small>
                 </div>
             </div>`;
     };
 
-    const allVolumes = [...mainVolumes, ...vol3Chapters, ...specialVolumes];
-    list.innerHTML = allVolumes.map(v => createCard(v)).join('');
+    const createRow = (title, items) => {
+        if (!items.length) return '';
+        return `<h3 class="row-title">${title}</h3>
+                <div class="volume-row-list">${items.map(v => createCard(v)).join('')}</div>`;
+    };
+
+    // Render baris sesuai grup asli kamu
+    list.innerHTML += createRow("Main Story: Vol 01 - 05", mainVolumes.slice(0, 4));
+    list.innerHTML += createRow("Exclusive: Volume 03 Chapters", vol3Chapters);
+    list.innerHTML += createRow("Main Story: Vol 06 - 10", mainVolumes.slice(4, 9));
+    list.innerHTML += createRow("Main Story: Vol 11 - 15", mainVolumes.slice(9, 14));
+    list.innerHTML += createRow("Final Story: Vol 16 - 18", mainVolumes.slice(14));
+    list.innerHTML += createRow("Special Collection", specialVolumes);
+
+    calculateGlobal();
 }
 
 // --- 4. READER LOGIC ---
 async function openReader(id, title) {
-    // LOCK VOLUME 11
     if (id === 'vol11') {
         alert("Akses terbatas, batas waktu 01:01-7:2026");
         return;
@@ -71,13 +84,11 @@ async function openReader(id, title) {
     document.getElementById('reader').classList.remove('hidden');
 
     let finalUrl;
-    // CEK APAKAH SPESIAL ATAU ARCHIVE
     if (id === 'extra') {
         finalUrl = '/comics/Sekirei Extra Celebrate.pdf';
     } else if (id === 'carousel') {
         finalUrl = '/comics/carousel.pdf';
     } else {
-        // PAKE PROXY BIAR ARCHIVE.ORG KEBACA
         let rawUrl = archiveBase + id + ".pdf";
         finalUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
     }
@@ -110,7 +121,6 @@ async function renderPage(num) {
 async function initCarousel() {
     const track = document.getElementById('carousel-track');
     try {
-        // PAKAI /comics/ SESUAI MAU KAMU
         carouselPdfInstance = await pdfjsLib.getDocument('/comics/slider.pdf').promise;
         for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
             const slide = document.createElement('div');
@@ -138,6 +148,15 @@ function updateCarouselUI() {
     renderCarouselPage(carouselIndex + 1);
 }
 
+// --- UTILS ---
+function calculateGlobal() {
+    const all = [...mainVolumes, ...vol3Chapters, ...specialVolumes];
+    let t = 0;
+    all.forEach(v => t += parseInt(localStorage.getItem(`prog_${v.id}`)) || 0);
+    const el = document.getElementById('total-stat');
+    if(el) el.innerText = `Total Progress: ${Math.round(t / all.length)}%`;
+}
+
 function closeReader() {
     document.getElementById('dashboard').classList.remove('hidden');
     document.getElementById('reader').classList.add('hidden');
@@ -145,6 +164,7 @@ function closeReader() {
 
 function nextPage() { if (currentPage < currentPdf.numPages) renderPage(++currentPage); }
 function prevPage() { if (currentPage > 1) renderPage(--currentPage); }
+function goToPage(num) { currentPage = parseInt(num); renderPage(currentPage); }
 
 initApp();
                 
