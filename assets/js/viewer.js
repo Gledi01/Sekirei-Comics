@@ -35,7 +35,7 @@ async function initApp() {
     }, 4000);
 }
 
-// --- 3. DASHBOARD RENDERER (TAMPILAN ASLI KAMU) ---
+// --- 3. DASHBOARD RENDERER (Sesuai Tampilan Asli Kamu) ---
 function renderDashboard() {
     const list = document.getElementById('volume-list');
     if (!list) return;
@@ -60,7 +60,6 @@ function renderDashboard() {
                 <div class="volume-row-list">${items.map(v => createCard(v)).join('')}</div>`;
     };
 
-    // Render baris sesuai grup asli kamu
     list.innerHTML += createRow("Main Story: Vol 01 - 05", mainVolumes.slice(0, 4));
     list.innerHTML += createRow("Exclusive: Volume 03 Chapters", vol3Chapters);
     list.innerHTML += createRow("Main Story: Vol 06 - 10", mainVolumes.slice(4, 9));
@@ -89,7 +88,9 @@ async function openReader(id, title) {
     } else if (id === 'carousel') {
         finalUrl = '/comics/carousel.pdf';
     } else {
-        let rawUrl = archiveBase + id + ".pdf";
+        // Menggunakan link download langsung Archive.org
+        const rawUrl = archiveBase + id + ".pdf";
+        // Menggunakan proxy AllOrigins untuk menembus CORS Archive.org
         finalUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
     }
 
@@ -98,7 +99,11 @@ async function openReader(id, title) {
         currentPdf = await loadingTask.promise;
         currentPage = parseInt(localStorage.getItem(`last_page_${id}`)) || 1;
         renderPage(currentPage);
-    } catch (e) { alert("Gagal memuat PDF."); closeReader(); }
+    } catch (e) { 
+        console.error(e);
+        alert("Gagal memuat PDF. Pastikan koneksi stabil."); 
+        closeReader(); 
+    }
 }
 
 async function renderPage(num) {
@@ -121,6 +126,7 @@ async function renderPage(num) {
 async function initCarousel() {
     const track = document.getElementById('carousel-track');
     try {
+        // Slider tetap lokal jalur absolut
         carouselPdfInstance = await pdfjsLib.getDocument('/comics/slider.pdf').promise;
         for (let i = 1; i <= TOTAL_BANNER_PAGES; i++) {
             const slide = document.createElement('div');
@@ -129,7 +135,7 @@ async function initCarousel() {
             track.appendChild(slide);
         }
         renderCarouselPage(1);
-    } catch (e) { console.warn("Slider gagal."); }
+    } catch (e) { console.warn("Slider gagal dimuat dari /comics/slider.pdf"); }
 }
 
 async function renderCarouselPage(num) {
@@ -144,8 +150,11 @@ async function renderCarouselPage(num) {
 }
 
 function updateCarouselUI() {
-    document.getElementById('carousel-track').style.transform = `translateX(-${carouselIndex * 100}%)`;
-    renderCarouselPage(carouselIndex + 1);
+    const track = document.getElementById('carousel-track');
+    if(track) {
+        track.style.transform = `translateX(-${carouselIndex * 100}%)`;
+        renderCarouselPage(carouselIndex + 1);
+    }
 }
 
 // --- UTILS ---
@@ -167,4 +176,4 @@ function prevPage() { if (currentPage > 1) renderPage(--currentPage); }
 function goToPage(num) { currentPage = parseInt(num); renderPage(currentPage); }
 
 initApp();
-                
+            
