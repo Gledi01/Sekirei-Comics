@@ -149,3 +149,37 @@ button { cursor: pointer; border: none; font-weight: bold; font-family: inherit;
         border-radius: 8px;
     }
 }
+
+.popup-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999
+}
+.popup-box{
+  background:#111;
+  padding:24px 28px;
+  border-radius:14px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(255,0,80,.3);
+  animation:pop .25s ease
+}
+.popup-box h2{color:#ff4d6d;margin-bottom:10px}
+.popup-box p{color:#ccc;font-size:14px;line-height:1.5}
+.popup-box button{
+  margin-top:16px;
+  padding:8px 22px;
+  border:0;
+  border-radius:20px;
+  background:#ff4d6d;
+  color:#fff;
+  cursor:pointer
+}
+@keyframes pop{
+  from{transform:scale(.85);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.hidden{display:none}
