@@ -150,36 +150,95 @@ button { cursor: pointer; border: none; font-weight: bold; font-family: inherit;
     }
 }
 
-.popup-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999
+/* Overlay dengan efek blur (Glassmorphism) */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6); /* Sedikit lebih transparan */
+  backdrop-filter: blur(8px);      /* Efek blur di background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px; /* Jarak aman untuk layar HP */
 }
-.popup-box{
-  background:#111;
-  padding:24px 28px;
-  border-radius:14px;
-  text-align:center;
-  box-shadow:0 0 40px rgba(255,0,80,.3);
-  animation:pop .25s ease
+
+/* Kotak Popup */
+.popup-box {
+  background: #1a1a1a; /* Warna sedikit lebih terang dari #111 */
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px; /* Agar tidak terlalu lebar di layar PC */
+  
+  /* Border tipis & Shadow glowing */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.5), 
+    0 0 30px rgba(255, 77, 109, 0.15); /* Glow pink halus */
+  
+  /* Animasi masuk */
+  animation: popBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.popup-box h2{color:#ff4d6d;margin-bottom:10px}
-.popup-box p{color:#ccc;font-size:14px;line-height:1.5}
-.popup-box button{
-  margin-top:16px;
-  padding:8px 22px;
-  border:0;
-  border-radius:20px;
-  background:#ff4d6d;
-  color:#fff;
-  cursor:pointer
+
+/* Judul */
+.popup-box h2 {
+  color: #ff4d6d;
+  font-family: 'Segoe UI', sans-serif; /* Font sistem yang bersih */
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  letter-spacing: 0.5px;
 }
-@keyframes pop{
-  from{transform:scale(.85);opacity:0}
-  to{transform:scale(1);opacity:1}
+
+/* Paragraf */
+.popup-box p {
+  color: #b3b3b3;
+  font-family: sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
-.hidden{display:none}
+
+/* Tombol Action */
+.popup-box button {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #ff4d6d, #ff2a55); /* Gradient */
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+}
+
+/* Efek Hover Tombol */
+.popup-box button:hover {
+  transform: translateY(-2px); /* Tombol naik sedikit */
+  box-shadow: 0 8px 25px rgba(255, 77, 109, 0.6);
+  background: linear-gradient(135deg, #ff6b85, #ff4d6d);
+}
+
+.popup-box button:active {
+  transform: scale(0.95); /* Efek tekan */
+}
+
+/* Utility Class */
+.hidden {
+  display: none !important;
+}
+
+/* Animasi Bouncy */
+@keyframes popBounce {
+  0% {
+    transform: scale(0.7) translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
