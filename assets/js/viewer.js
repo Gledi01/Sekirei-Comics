@@ -65,6 +65,14 @@ async function initApp() {
         carouselIndex = (carouselIndex + 1) % TOTAL_BANNER_PAGES;
         updateCarouselUI();
     }, 4000);
+
+    // ===== SLIDER FIX ADDITION =====
+    const pageSlider = document.getElementById('page-slider');
+    if(pageSlider){
+        pageSlider.addEventListener('input', e => {
+            goToPage(e.target.value);
+        });
+    }
 }
 
 // --- 3. DASHBOARD RENDERER ---
@@ -124,11 +132,9 @@ async function openReader(id, title) {
     document.getElementById('reader').classList.remove('hidden');
 
     let finalUrl;
-    if (id === 'extra') {
-        finalUrl = '/comics/Sekirei Extra Celebrate.pdf';
-    } else if (id === 'carousel') {
-        finalUrl = '/comics/carousel.pdf';
-    } else {
+    if (id === 'extra') finalUrl = '/comics/Sekirei Extra Celebrate.pdf';
+    else if (id === 'carousel') finalUrl = '/comics/carousel.pdf';
+    else {
         const rawUrl = archiveLibrary[id];
         finalUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
     }
@@ -155,7 +161,14 @@ async function renderPage(num) {
     canvas.width = viewport.width;
     container.appendChild(canvas);
     renderTask = page.render({ canvasContext: canvas.getContext('2d'), viewport });
+
     document.getElementById('page-info').innerText = `${num} / ${currentPdf.numPages}`;
+    document.getElementById('page-slider').max = currentPdf.numPages;
+    document.getElementById('page-slider').value = num;
+
+    // ===== PROGRESS FIX ADDITION =====
+    const percent = Math.round((num / currentPdf.numPages) * 100);
+    localStorage.setItem(`prog_${currentVolId}`, percent);
 }
 
 // --- 5. CAROUSEL ---
