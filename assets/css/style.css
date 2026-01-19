@@ -171,7 +171,7 @@ button { cursor: pointer; border: none; font-weight: bold; font-family: inherit;
   text-align: center;
   width: 100%;
   max-width: 400px; /* Agar tidak terlalu lebar di layar PC */
-  
+  /* Flag BakaCTF{comics_web_pag3s} */
   /* Border tipis & Shadow glowing */
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 
